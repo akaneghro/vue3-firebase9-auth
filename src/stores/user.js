@@ -2,6 +2,7 @@ import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndP
 import { defineStore } from 'pinia'
 import { auth } from '../firebaseConfig'
 import { router } from '../router'
+import { useDatabaseStore } from './database'
 
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -38,6 +39,8 @@ export const useUserStore = defineStore('user', {
             }
         },
         async logoutUser(){
+            const databaseStore = useDatabaseStore()
+            databaseStore.$reset()
             try {
                 await signOut(auth)
                 this.userData = null
