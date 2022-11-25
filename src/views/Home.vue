@@ -1,45 +1,66 @@
 <script setup>
-import {useUserStore} from '../stores/user'
-import { useDatabaseStore } from '../stores/database';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useUserStore } from "../stores/user";
+import { useDatabaseStore } from "../stores/database";
+import { useRouter } from "vue-router";
+import { message } from "ant-design-vue";
 
-const userStore = useUserStore()
-const dataBaseStore = useDatabaseStore()
-const router = useRouter()
+const userStore = useUserStore();
+const databaseStore = useDatabaseStore();
+const router = useRouter();
 
-dataBaseStore.getUrls()
+databaseStore.getUrls();
 
-const url = ref('')
+const confirm = async (id) => {
+    const error = await databaseStore.deleteUrl(id);
 
-const handleSubmit = () => {
-    //TODO: Validacopnes de la url...    
-    dataBaseStore.addUrl(url.value)
-}
+    if (!error) {
+        message.success("Se eleiminó con éxito");
+    } else {
+        message.error(error);
+    }
+};
 </script>
 
 <template>
     <div>
         <h1>Home</h1>
-        <p>{{userStore.userData?.email}}</p>
+        <p>{{ userStore.userData?.email }}</p>
 
-        <form @submit.prevent="handleSubmit">
-            <input type="text" placeholder="Ingrese URL" v-model="url">
-            <button type="submit">Agregar</button>
-        </form>
+        <AddForm></AddForm>
 
-        <p v-if="dataBaseStore.loadingDoc">Loading...</p>
-        <ul v-else>
-            <li v-for="item in dataBaseStore.documents" :key="item.id">
-                {{item.id}}
-                <br>
-                {{item.name}}
-                <br>
-                {{item.short}}
-                <br>
-                <button @click="dataBaseStore.deleteUrl(item.id)">Eliminar</button>
-                <button @click="router.push(`/editar/${item.id}`)">Editar</button>
-            </li>
-        </ul>
+        <p v-if="databaseStore.loadingDoc">Loading...</p>
+
+        <a-space direction="vertical" v-else style="width: 100%">
+            <a-card
+                v-for="item in databaseStore.documents"
+                :key="item.id"
+                :title="item.short"
+                style="width: 100%"
+            >
+                <template #extra>
+                    <a-space>
+                        <a-button
+                            type="primary"
+                            @click="router.push(`/editar/${item.id}`)"
+                            >Editar</a-button
+                        >
+                        <a-popconfirm
+                            title="Deseas eliminar la URL?"
+                            ok-text="Si"
+                            cancel-text="No"
+                            @confirm="confirm(item.id)"
+                        >
+                            <a-button
+                                danger
+                                :disabled="databaseStore.loading"
+                                :loading="databaseStore.loading"
+                                >Eliminar</a-button
+                            >
+                        </a-popconfirm>
+                    </a-space>
+                </template>
+                <p>{{ item.name }}</p>
+            </a-card>
+        </a-space>
     </div>
 </template>

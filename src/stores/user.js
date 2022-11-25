@@ -21,7 +21,8 @@ export const useUserStore = defineStore('user', {
                 this.userData = {email: user.email, uid: user.uid}
                 router.push('/')
             } catch (e) {
-                console.log(e)
+                console.log(e.code)
+                return e.code
             } finally {
                 this.loadingUser = false
             }
@@ -33,7 +34,8 @@ export const useUserStore = defineStore('user', {
                 this.userData = {email: user.email, uid: user.uid}
                 router.push('/')
             } catch (e) {
-                console.log(e)
+                console.log(e.code)
+                return e.code
             } finally {
                 this.loadingUser = false
             }

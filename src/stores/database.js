@@ -7,7 +7,8 @@ import { router } from "../router";
 export const useDatabaseStore = defineStore('database', {
     state: () => ({
         documents: [],
-        loadingDoc: false,
+        loading: false,
+        loadingDoc: false,        
     }),
     actions: {
         async getUrls(){
@@ -59,6 +60,7 @@ export const useDatabaseStore = defineStore('database', {
             }
         },
         async addUrl(name) {
+            this.loading = true
             try {
                 const objetoDoc = {
                     name: name,
@@ -76,11 +78,13 @@ export const useDatabaseStore = defineStore('database', {
 
             } catch (e) {
                 console.log(e)
+                return e.code
             } finally {
-
+                this.loading = false
             }
         },
         async updateUrl(id, name){
+            this.loading = true
             try {
                 const docRef = doc(db, 'urls', id)
 
@@ -104,9 +108,13 @@ export const useDatabaseStore = defineStore('database', {
 
             } catch (e) {
                 console.log(e.message)
+                return e.code
+            } finally{
+                this.loading = false
             }
         },
         async deleteUrl(id){
+            this.loading = true
             try {
                 const docRef = doc(db, 'urls', id)
 
@@ -126,6 +134,9 @@ export const useDatabaseStore = defineStore('database', {
 
             } catch (e) {
                 console.log(e.message)
+                return e.code
+            }finally{
+                this.loading = false
             }
         }
     }
