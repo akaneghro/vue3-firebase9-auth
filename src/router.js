@@ -3,6 +3,7 @@ import Home from './views/Home.vue'
 import Login from './views/Login.vue'
 import Register from './views/Register.vue'
 import Editar from './views/Editar.vue'
+import Perfil from './views/Perfil.vue'
 import {useUserStore} from './stores/user'
 
 const requiereAuth = async(to, from, next) => {
@@ -19,6 +20,7 @@ const requiereAuth = async(to, from, next) => {
 
 const routes = [
     {path: '/', component: Home, beforeEnter: requiereAuth, name: 'home'},
+    {path: '/perfil', component: Perfil, beforeEnter: requiereAuth, name: 'perfil'},
     {path: '/editar/:id', component: Editar, beforeEnter: requiereAuth, name: 'editar'},
     {path: '/login', component: Login, name: 'login'},
     {path: '/register', component: Register, name: 'register'},
