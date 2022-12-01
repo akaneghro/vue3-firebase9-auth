@@ -28,13 +28,13 @@ const onFinish = async () => {
 };
 
 onMounted(async () => {
-    formState.url = await databaseStore.getUrl(route.params.id);
+    formState.url = await databaseStore.readUrl(route.params.id);
 });
 </script>
 
 <template>
     <div>
-        <h1>Editar id: {{route.params.id}}</h1>
+        <h1>Editar id: {{ route.params.id }}</h1>
         <a-form
             name="editform"
             autocomplete="off"

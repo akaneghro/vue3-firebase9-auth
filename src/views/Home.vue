@@ -19,6 +19,17 @@ const confirm = async (id) => {
         message.error(error);
     }
 };
+
+const copiar = (id) => {
+    if (!navigator.clipboard) {
+        message.error("No se ha podido copiar al portapapeles");
+    } else {
+        const path = `${window.location.origin}/${id}`;
+        navigator.clipboard.writeText(path).then(() => {
+            message.success("Copiado con éxito");
+        });
+    }
+};
 </script>
 
 <template>
@@ -39,6 +50,7 @@ const confirm = async (id) => {
             >
                 <template #extra>
                     <a-space>
+                        <a-button @click="copiar(item.id)">Copiar</a-button>
                         <a-button
                             type="primary"
                             @click="router.push(`/editar/${item.id}`)"

@@ -85,29 +85,21 @@ const handleChange = ({ file, fileList }) => {
             file.type === "image/jpeg" || file.type === "image/png";
         if (!isJpgOrPng) {
             message.error("Solo imágenes PNG o JPEG!");
-            handleRemove(file)
+            handleRemove(file);
         }
         const isLt2M = file.size / 1024 / 1024 < 2;
         if (!isLt2M) {
             message.error("Máximo 2Mb");
-            handleRemove(file)
+            handleRemove(file);
         }
     }
 };
 
 const onFinish = async () => {
-
-    const error = await userStore.updateUser(userStore.userData.displayName);
-
-    if (fileList.value[0]){
-        const error = await userStore.updateImg(fileList.value[0])
-
-        if (!error) {
-            message.success("Se subió la imagen");
-        } else {
-            message.error("Ocurrió un error");
-        }
-    }
+    const error = await userStore.updateUser(
+        userStore.userData.displayName,
+        fileList.value[0]
+    );
 
     if (!error) {
         message.success("Se actualizó la información");
@@ -118,7 +110,7 @@ const onFinish = async () => {
 </script>
 
 <style>
-.mb-2{
+.mb-2 {
     margin-bottom: 2rem;
 }
 </style>

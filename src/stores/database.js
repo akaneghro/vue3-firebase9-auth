@@ -1,143 +1,167 @@
-import { collection, getDocs, query, where, addDoc, doc, deleteDoc, getDoc, updateDoc } from "firebase/firestore/lite";
+import {
+    collection,
+    deleteDoc,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    setDoc,
+    updateDoc,
+    where,
+} from "firebase/firestore/lite";
 import { nanoid } from "nanoid";
 import { defineStore } from "pinia";
-import { db, auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 import { router } from "../router";
 
-export const useDatabaseStore = defineStore('database', {
+export const useDatabaseStore = defineStore("database", {
     state: () => ({
         documents: [],
         loading: false,
-        loadingDoc: false,        
+        loadingDoc: false,
     }),
     actions: {
-        async getUrls(){
-
-            if(this.documents.length !== 0){
-                return
-            }
-
-            this.loadingDoc = true
-
+        async getUrl(id) {
             try {
-                const q = query(collection(db, 'urls'), 
-                where("user", "==", auth.currentUser.uid))
+                const docRef = doc(db, "urls", id);
 
-                const querySnapshot = await getDocs(q)
+                const docu = await getDoc(docRef);
 
-                querySnapshot.forEach(doc => {
-                    console.log(doc.id, doc.data)
-                    this.documents.push({
-                        id: doc.id,
-                        ...doc.data()
-                    })
-                })
+                if (!docu.exists()) {
+                    return false;
+                }
 
+                return docu.data().name;
             } catch (e) {
-                console.log(e)
-            } finally {
-                this.loadingDoc = false
+                console.log(e.message);
+                return false;
             }
         },
-        async getUrl(id){
+        async getUrls() {
+            if (this.documents.length !== 0) {
+                return;
+            }
+
+            this.loadingDoc = true;
+
             try {
-                const docRef = doc(db, 'urls', id)
+                const q = query(
+                    collection(db, "urls"),
+                    where("user", "==", auth.currentUser.uid)
+                );
 
-                const docu = await getDoc(docRef)
+                const querySnapshot = await getDocs(q);
 
-                if(!docu.exists()){
-                    throw new Error('No existe el documento')
-                }
-
-                if(docu.data().user !== auth.currentUser.uid){
-                    throw new Error('No le pertenece el documento')
-                }
-
-                return docu.data().name
-
+                querySnapshot.forEach((doc) => {
+                    console.log(doc.id, doc.data);
+                    this.documents.push({
+                        id: doc.id,
+                        ...doc.data(),
+                    });
+                });
             } catch (e) {
-                console.log(e.message)
+                console.log(e);
+            } finally {
+                this.loadingDoc = false;
+            }
+        },
+        async readUrl(id) {
+            try {
+                const docRef = doc(db, "urls", id);
+
+                const docu = await getDoc(docRef);
+
+                if (!docu.exists()) {
+                    throw new Error("No existe el documento");
+                }
+
+                if (docu.data().user !== auth.currentUser.uid) {
+                    throw new Error("No le pertenece el documento");
+                }
+
+                return docu.data().name;
+            } catch (e) {
+                console.log(e.message);
             }
         },
         async addUrl(name) {
-            this.loading = true
+            this.loading = true;
             try {
                 const objetoDoc = {
                     name: name,
                     short: nanoid(6),
-                    user: auth.currentUser.uid
-                }
+                    user: auth.currentUser.uid,
+                };
 
-                const docRef = await addDoc(collection(db, "urls"), objetoDoc)
-                
+                await setDoc(doc(db, "urls", objetoDoc.short), objetoDoc);
+
                 this.documents.push({
-                    id: docRef.id,
-                    ...objetoDoc
-                    
-                })
-
+                    id: objetoDoc.short,
+                    ...objetoDoc,
+                });
             } catch (e) {
-                console.log(e)
-                return e.code
+                console.log(e);
+                return e.code;
             } finally {
-                this.loading = false
+                this.loading = false;
             }
         },
-        async updateUrl(id, name){
-            this.loading = true
+        async updateUrl(id, name) {
+            this.loading = true;
             try {
-                const docRef = doc(db, 'urls', id)
+                const docRef = doc(db, "urls", id);
 
-                const docu = await getDoc(docRef)
+                const docu = await getDoc(docRef);
 
-                if(!docu.exists()){
-                    throw new Error('No existe el documento')
+                if (!docu.exists()) {
+                    throw new Error("No existe el documento");
                 }
 
-                if(docu.data().user !== auth.currentUser.uid){
-                    throw new Error('No le pertenece el documento')
+                if (docu.data().user !== auth.currentUser.uid) {
+                    throw new Error("No le pertenece el documento");
                 }
                 await updateDoc(docRef, {
-                    name: name
-                })
+                    name: name,
+                });
 
-                this.documents = this.documents.map(item => 
-                    item.id === id ? ({...item, name: name}) : item)
+                this.documents = this.documents.map((item) =>
+                    item.id === id ? { ...item, name: name } : item
+                );
 
-                router.push('/')
-
+                router.push("/");
             } catch (e) {
-                console.log(e.message)
-                return e.code
-            } finally{
-                this.loading = false
+                console.log(e.message);
+                return e.code;
+            } finally {
+                this.loading = false;
             }
         },
-        async deleteUrl(id){
-            this.loading = true
+        async deleteUrl(id) {
+            this.loading = true;
             try {
-                const docRef = doc(db, 'urls', id)
+                const docRef = doc(db, "urls", id);
 
-                const docu = await getDoc(docRef)
+                const docu = await getDoc(docRef);
 
-                if(!docu.exists()){
-                    throw new Error('No existe el documento')
+                if (!docu.exists()) {
+                    throw new Error("No existe el documento");
                 }
 
-                if(docu.data().user !== auth.currentUser.uid){
-                    throw new Error('No le pertenece el documento')
+                if (docu.data().user !== auth.currentUser.uid) {
+                    throw new Error("No le pertenece el documento");
                 }
 
-                await deleteDoc(docRef)
+                await deleteDoc(docRef);
 
-                this.documents = this.documents.filter(item => item.id !== id)
-
+                this.documents = this.documents.filter(
+                    (item) => item.id !== id
+                );
             } catch (e) {
-                console.log(e.message)
-                return e.code
-            }finally{
-                this.loading = false
+                console.log(e.message);
+                return e.code;
+            } finally {
+                this.loading = false;
             }
-        }
-    }
-})
+        },
+    },
+});

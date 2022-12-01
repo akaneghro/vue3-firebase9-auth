@@ -37,8 +37,21 @@ export const useUserStore = defineStore("user", {
                 this.loadingUser = false;
             }
         },
-        async updateUser(displayName) {
+        async updateUser(displayName, imagen) {
+            this.loadingUser = true;
             try {
+                if (imagen) {
+                    const storageRef = ref(
+                        storage,
+                        `perfiles/${auth.currentUser.uid}`
+                    );
+                    await uploadBytes(storageRef, imagen.originFileObj);
+                    const photoURL = await getDownloadURL(storageRef);
+                    await updateProfile(auth.currentUser, {
+                        photoURL: photoURL,
+                    });
+                }
+
                 await updateProfile(auth.currentUser, {
                     displayName: displayName,
                 });
@@ -47,25 +60,8 @@ export const useUserStore = defineStore("user", {
             } catch (e) {
                 console.log(e.message);
                 return error.code;
-            }
-        },
-        async updateImg(imagen){
-            try {
-                const storageRef = ref(storage, `${auth.currentUser.uid}/perfil`)
-
-                await uploadBytes(storageRef, imagen.originFileObj)
-
-                const photoURL = await getDownloadURL(storageRef)
-
-                await updateProfile(auth.currentUser, {
-                    photoURL: photoURL,
-                });
-
-                this.setUser(auth.currentUser);
-
-            } catch (e) {
-                console.log(e.message)
-                return error.code
+            } finally {
+                this.loadingUser = false;
             }
         },
         async setUser(user) {
@@ -87,8 +83,12 @@ export const useUserStore = defineStore("user", {
         async loginUser(email, password) {
             this.loadingUser = true;
             try {
-                const {user} = await signInWithEmailAndPassword(auth, email, password);
-                await this.setUser(user)
+                const { user } = await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+                await this.setUser(user);
                 router.push("/");
             } catch (e) {
                 console.log(e.code);

@@ -51,7 +51,7 @@ watch(
         <a-layout-content style="padding: 0 50px">
             <div class="container">
                 <div v-if="userStore.loadingSession">Loading...</div>
-                <router-view></router-view>
+                <router-view v-else></router-view>
             </div>
         </a-layout-content>
     </a-layout>
@@ -63,7 +63,7 @@ watch(
     padding: 24px;
     min-height: calc(100vh - 64px);
 }
-.text-center{
+.text-center {
     text-align: center;
 }
 </style>
